@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id String @id @default(uuid())
+  student_name String @db.VarChar(100)
+  father_name String @db.VarChar(100)
+  mother_name String @db.VarChar(100)
+  dob DateTime
+  blood_group String @db.Char(3)
+  contact_number String
+  email String @unique @db.VarChar(25)
+  password String @db.VarChar(255)
+  address String @db.VarChar(255)
+  request Request[]
+
+  @@map("student")
+}
+
+model Request {
+  id   String @id @default(uuid())
+  student Student @relation(fields: [studentId],references: [id])
+  studentId String 
+  request_type String
+  request_book String
+  createdAt DateTime
+
+  @@map("request")
+}
+
+model Employee {
+  id Int @id @default(autoincrement())
+  fullname String
+  email String @unique
+  department String
+  job_type String
+  @@map("employee")
+}
+
+model SuperAdmin{
+  id Int @id @default(autoincrement())
+  fullname String
+  email String @unique
+  password String
+  contact String
+  @@map("super_admin")
+}
+
+model Admin{
+  id Int @id @default(autoincrement())
+  fullname String
+  email String @unique
+  password String
+  jobType Role
+  @@map("admin")
+}
+
+model Student_Register{
+  id Int @id @default(autoincrement())
+  fullname String
+  standard String
+  father_name String
+  mother_name String
+  contact_no String
+  address String
+  @@map("student_register")
+}
+
+model Book{
+  id String @id @default(uuid())
+  name String?
+  title String
+  author String 
+  copies Int
+  @@map("book")
+}
+
+
+enum Role {
+  ACCOUNTANT
+  LIBRARIAN
+  EXAMCONTROLLER
+  OTHERS
+}

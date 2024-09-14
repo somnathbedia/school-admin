@@ -9,7 +9,16 @@ const PORT = process.env.PORT || 3000
 export const prisma = new PrismaClient()
 import cors from "cors";
 import library from "./library/admin"
-import admin from "./admins/login"
+import admin from "./admins/login";
+
+import { z } from "zod";
+
+const AdminI = z.object({
+    fullname: z.string().max(25),
+    email: z.string().email(),
+    password: z.string().max(12),
+    jobType:z.enum(['ACCOUNTANT','LIBRARIAN','EXAMCONTROLLER','OTHERS'])
+})
 export interface CustomRequest extends Request {
     super_admin?: any;
 }
@@ -44,7 +53,10 @@ app.post("/superadmins/signin", async (req: Request, res: Response) => {
 })
 
 app.post("/superadmins/createadmins", authenticateJWT, async (req: Request, res: Response) => {
-    const { fullname, email, password, jobType } = req.body;
+
+    try
+    {
+        const { fullname, email, password, jobType } = AdminI.parse(req.body);
 
 
     const admin = await prisma.admin.create({
@@ -57,6 +69,15 @@ app.post("/superadmins/createadmins", authenticateJWT, async (req: Request, res:
     })
 
     res.status(201).json({ msg: "Admin created Successfully", admin })
+    }
+    catch (error)
+    {
+        res.status(400).json({
+            message: 'Validation error',
+            errors: error,
+          }); 
+    }
+    
 })
 
 app.use("/admins", admin)
